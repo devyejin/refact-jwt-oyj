@@ -6,6 +6,7 @@ import com.example.usedtrade.security.filter.JWTCheckFilter;
 import com.example.usedtrade.security.filter.JWTLoginFilter;
 import com.example.usedtrade.security.filter.JWTRefreshTokenFilter;
 import com.example.usedtrade.security.handler.JwtLoginSuccessHandler;
+import com.example.usedtrade.security.handler.SocialLoginSuccessHandler;
 import com.example.usedtrade.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -20,7 +21,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -33,6 +36,11 @@ public class CustomSecurityConfig {
     private final JwtUserDetailsService jwtUserDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
+
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new SocialLoginSuccessHandler(passwordEncoder);
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -70,6 +78,11 @@ public class CustomSecurityConfig {
                 // JWTCheckFilter (토큰 확인전에 만료여부 부터 체크)
                 .addFilterBefore(new JWTRefreshTokenFilter(jwtUtil,"/refreshToken"),
                         JWTCheckFilter.class)
+
+                //oauth2 + kakao
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/user/login")
+                        .successHandler(authenticationSuccessHandler()))
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorizeRequests) -> {

@@ -27,8 +27,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
-    implementation 'javax.xml.bind:jaxb-api:2.3.1' // 현재 버전에 맞게 변경
-
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
