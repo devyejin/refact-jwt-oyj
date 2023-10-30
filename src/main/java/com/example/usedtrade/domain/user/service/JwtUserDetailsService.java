@@ -11,7 +11,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Log4j2
 @Service
@@ -32,7 +34,9 @@ public class JwtUserDetailsService implements UserDetailsService {
         UserDTO userDTO = new UserDTO(
                 user.getUsername(),
                 user.getPwd(),
-                List.of(new SimpleGrantedAuthority("ROLE_USER")) //우선 모든 사용자에 USER권한 부여하는 방식으로 처리
+                user.getEmail(),
+                false,
+                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")) //우선 모든 사용자에 USER권한 부여하는 방식으로 처리
         );
 
         log.info("userDTO={}", userDTO);
