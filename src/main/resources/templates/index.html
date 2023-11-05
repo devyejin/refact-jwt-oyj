@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged In User</title>
+</head>
+
+<body>
+<h1>Welcome, <span sec:authentication="principal.username">Guest</span>!</h1>
+<!-- 사용자 정보를 출력합니다. 로그인이 되어있지 않은 경우에는 "Guest"라고 표시됩니다. -->
+
+<a href="/user/loginForm">로그인 페이지 이동</a>
+<a href="/chat/rooms">채팅방 목록으로 이동</a>
+</body>
+
+</html>

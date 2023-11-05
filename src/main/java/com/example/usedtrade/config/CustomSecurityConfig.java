@@ -1,27 +1,21 @@
 package com.example.usedtrade.config;
 
-import com.example.usedtrade.domain.user.entity.User;
 import com.example.usedtrade.domain.user.service.JwtUserDetailsService;
-import com.example.usedtrade.security.filter.JWTCheckFilter;
-import com.example.usedtrade.security.filter.JWTLoginFilter;
-import com.example.usedtrade.security.filter.JWTRefreshTokenFilter;
-import com.example.usedtrade.security.handler.JwtLoginSuccessHandler;
+import com.example.usedtrade.security.filter.JwtAuthenticationFilter;
 import com.example.usedtrade.security.handler.SocialLoginSuccessHandler;
-import com.example.usedtrade.util.JWTUtil;
+import com.example.usedtrade.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -35,7 +29,7 @@ public class CustomSecurityConfig {
 
     private final JwtUserDetailsService jwtUserDetailsService;
     private final PasswordEncoder passwordEncoder;
-    private final JWTUtil jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
@@ -61,28 +55,33 @@ public class CustomSecurityConfig {
 
 
         //JwtAuthenticationFilter설정 (<- 순으로)
-        JWTLoginFilter jwtLoginFilter = new JWTLoginFilter("/generateToken");
-        jwtLoginFilter.setAuthenticationManager(authenticationManager); //필요한 authenticationManager를 filter에 설정
-
-        //JwtLoginSuccessHandler 설정
-        JwtLoginSuccessHandler successHandler = new JwtLoginSuccessHandler(jwtUtil);
-        jwtLoginFilter.setAuthenticationSuccessHandler(successHandler);
+//        JWTLoginFilter jwtLoginFilter = new JWTLoginFilter("/user/login"); //<-- Username디폴트필터대신 JwtFilter가 동작하니 여기서 post 로그인요청 처리
+//        jwtLoginFilter.setAuthenticationManager(authenticationManager); //필요한 authenticationManager를 filter에 설정
+//
+//        //JwtLoginSuccessHandler 설정
+//        JwtLoginSuccessHandler successHandler = new JwtLoginSuccessHandler(jwtTokenProvider);
+//        jwtLoginFilter.setAuthenticationSuccessHandler(successHandler);
 
         http
+                //----------------------------------------- 기존 로직 -------------------------------
                 //http에 filter 설정 -> UsernamePass..Filter보다 jwtLoginFilter(custom) 먼저 동작
-                .addFilterBefore(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class)
+//
+//                // "/api/"로 시작하는 모든 요청은 JWTCheckFilter 동작
+//                .addFilterBefore(jwtCheckFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+//
+//                // JWTCheckFilter (토큰 확인전에 만료여부 부터 체크)
+//                .addFilterBefore(new JWTRefreshTokenFilter(jwtTokenProvider,"/refreshToken"),
+//                        JWTCheckFilter.class)
+                //----------------------------------------- 기존 로직 끝-------------------------------
 
-                // "/api/"로 시작하는 모든 요청은 JWTCheckFilter 동작
-                .addFilterBefore(jwtCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
 
-                // JWTCheckFilter (토큰 확인전에 만료여부 부터 체크)
-                .addFilterBefore(new JWTRefreshTokenFilter(jwtUtil,"/refreshToken"),
-                        JWTCheckFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
 
                 //oauth2 + kakao
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/user/login")
-                        .successHandler(authenticationSuccessHandler()))
+//                .oauth2Login(oauth2 -> oauth2
+//                        .loginPage("/user/login")
+//                        .successHandler(authenticationSuccessHandler()))
 
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorizeRequests) -> {
@@ -91,15 +90,17 @@ public class CustomSecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement((session) ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //RESTAPI 방식이라 Session 생성 안함
-                .formLogin(AbstractHttpConfigurer::disable)
+                .formLogin(form -> form
+                        .loginPage("/user/loginForm")
+                        .permitAll())
                 .httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
 
-    private JWTCheckFilter jwtCheckFilter(JWTUtil jwtUtil) {
-        return new JWTCheckFilter(jwtUtil);
-    }
+//    private JWTCheckFilter jwtCheckFilter(JwtTokenProvider jwtTokenProvider) {
+//        return new JWTCheckFilter(jwtTokenProvider);
+//    }
 
 
 }

@@ -18,6 +18,9 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+application-jwt.properties
+application-db.properties
+application-oauth2.properties
 .idea
 *.iws
 *.iml

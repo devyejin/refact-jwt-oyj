@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Rooms</title>
+</head>
+<body>
+<h1>Available Chat Rooms</h1>
+<ul>
+    <li th:each="room : ${list}">
+        <a th:href="'/chat/room?roomId=' + ${room.roomId}" th:text="${room.name}"></a>
+    </li>
+</ul>
+<h1>Create a New Chat Room</h1>
+<form action="/chat/create" method="POST">
+    <label for="name">Chat Room Name:</label>
+    <input type="text" id="name" name="name" required>
+    <button type="submit">Create Room</button>
+</form>
+
+</body>
+</html>

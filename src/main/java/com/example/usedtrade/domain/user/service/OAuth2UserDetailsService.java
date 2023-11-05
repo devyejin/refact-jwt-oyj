@@ -5,7 +5,6 @@ import com.example.usedtrade.domain.user.entity.User;
 import com.example.usedtrade.domain.user.entity.UserRole;
 import com.example.usedtrade.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -80,7 +79,7 @@ public class OAuth2UserDetailsService extends DefaultOAuth2UserService {
                     .social(true)
                     .build();
 
-            user.addRole(UserRole.USER);
+//            user.addRole(UserRole.USER);
 
             userRepository.save(user);
 
@@ -91,13 +90,15 @@ public class OAuth2UserDetailsService extends DefaultOAuth2UserService {
             return userDTO;
         } else {
             //가입된 회원에 존재하는 email인 경우 -> 소셜 정보만 추가해주기
-            User user = result.get();
-            UserDTO userDTO = new UserDTO(user.getUsername(), user.getPwd(), user.getEmail(), true, user.getRoleSet().stream()
-                    .map(userRole -> new SimpleGrantedAuthority("ROLE_" + userRole.name()))
-                    .collect(Collectors.toList())
-            );
+//            User user = result.get();
+//            UserDTO userDTO = new UserDTO(user.getUsername(), user.getPwd(), user.getEmail(), true, user.getRoles().stream()
+//                    .map(userRole -> new SimpleGrantedAuthority("ROLE_" + userRole.name()))
+//                    .collect(Collectors.toList())
+//            );
 
-            return userDTO;
+//            return userDTO;
+            // jwt로직변경하면서 addRole 제거해서! 여기도 수정해야함-------------------------
+            return null;
         }
     }
 }

@@ -8,9 +8,9 @@
     <meta name="author" content="" />
     <title>Simple Sidebar - Login</title>
     <!-- Favicon-->
-    <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />
+<!--    <link rel="icon" type="image/x-icon" th:href="@{/assets/favicon.ico}" />-->
     <!-- Core theme CSS (includes Bootstrap)-->
-    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+<!--    <link th:href="@{/css/styles.css}" rel="stylesheet" />-->
 </head>
 <body class="align-middle" >
 <div class="container-fluid d-flex justify-content-center" style="height: 100vh">
@@ -24,17 +24,17 @@
                 <h1>Logout........</h1>
             </th:block>
 
-            <form id="registerForm" action="/member/login" method="post">
+            <form id="loginForm" action="/user/login" method="post">
                 <div class="input-group mb-3">
                     <span class="input-group-text">아이디</span>
-                    <input type="text" name="username" class="form-control" placeholder="USER ID">
+                    <input type="text" id = "username" name="username" class="form-control" placeholder="USER ID">
                 </div>
                 <div class="input-group mb-3">
                     <span class="input-group-text">패스워드</span>
-                    <input type="text" name="password" class="form-control" placeholder="PASSWORD">
+                    <input type="text" id = "pwd" name="pwd" class="form-control" placeholder="PASSWORD">
                 </div>
                 <div class="input-group mb-3 ">
-                    <input class="form-check-input" type="checkbox" name="remember-me">
+                    <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
                     <label class="form-check-label">
                         자동 로그인
                     </label>
@@ -49,5 +49,39 @@
         </div><!--end card body-->
     </div><!--end card-->
 </div>
+<script>
+    document.getElementById("loginForm").addEventListener("submit",(event) => {
+        event.preventDefault(); //submit 기본 동작 막기
+
+        const username = document.getElementById("username").value;
+        let pwd = document.getElementById("pwd").value;
+        // let rememberMe = document.getElementById("remember-me").value;
+
+        //JSON 데이터 생성
+        const jsonData = {
+            username : username,
+            pwd : pwd,
+            // rememberMe : rememberMe
+        };
+        console.log("jsonData={}",jsonData);
+
+        //서버로 전송
+        fetch('/user/login', {
+            method : 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body : JSON.stringify(jsonData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.log("error:",error);
+            });
+    });
+
+</script>
 </body>
 </html>
